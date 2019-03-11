@@ -155,5 +155,3 @@ def run(data: dict):
 
     else:
         return send_message("Я тебя не понял, повтори ещё раз 🙄", chat_id)
-
-send_message(welcome_reply("anton_uspehov"), 14812358)
