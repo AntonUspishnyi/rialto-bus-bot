@@ -47,13 +47,13 @@ def welcome_reply(username: str) -> str:
 
 def text_reply_shedule(friday: bool) -> str:
     schedule = get_schedule()
-    text = ['🌝 **Утренняя развозка (пн-чт):** ']
+    text = ['🌝 Утренняя развозка (пн-чт):']
     key = 'friday' if friday else 'mon_thu'
         
     for time,description in schedule[key]['to'].items():
         text.append('{}  {}'.format(time, description))
 
-    text.append('\n🌚 **Вечерняя развозка (пн-чт):** ')
+    text.append('\n🌚 Вечерняя развозка (пн-чт):')
     
     for time,description in schedule[key]['from'].items():
         text.append('{}  {}'.format(time, description))
@@ -64,7 +64,7 @@ def text_reply_next_bus(unix_time: int) -> str:
     shedule = get_schedule()
     timestamp = convert_unixtime_to_datetime(unix_time)
     weekday = get_weekday(timestamp)
-    pre_text = '🚀 **Следующая развозка:** \n'
+    pre_text = '🚀 Следующая развозка:\n'
     weekends_answer = 'В понедельник в {} утра 🤷‍'.format(list(shedule['mon_thu']['to'].keys())[0])
 
     if weekday == 5:
