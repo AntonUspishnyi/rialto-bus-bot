@@ -47,13 +47,13 @@ def welcome_reply(username: str) -> str:
 
 def text_reply_shedule(friday: bool) -> str:
     schedule = get_schedule()
-    text = ['🌝 Утренняя развозка (пн-чт):']
+    text = ['🌝 Утренняя развозка:']
     key = 'friday' if friday else 'mon_thu'
         
     for time,description in schedule[key]['to'].items():
         text.append('{}  {}'.format(time, description))
 
-    text.append('\n🌚 Вечерняя развозка (пн-чт):')
+    text.append('\n🌚 Вечерняя развозка:')
     
     for time,description in schedule[key]['from'].items():
         text.append('{}  {}'.format(time, description))
