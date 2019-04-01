@@ -20,8 +20,12 @@ def get_weekday(date_time: datetime.datetime):
 
 
 def convert_unixtime_to_datetime(unix_date: int) -> datetime.datetime:
-    # Adding (3600 * 2) for UTC+02:00 offset (Kyiv timezone)
-    return datetime.datetime.utcfromtimestamp(unix_date + 3600 * 2)
+    """
+    Add (3600 * 2) for UTC+02:00 offset (Kyiv timezone)
+    OR Add (3600 * 3) for UTC+02:00 offset (Kyiv timezone with summer-time)
+    TODO: automatic summer-time detection
+    """
+    return datetime.datetime.utcfromtimestamp(unix_date + 3600 * 3)
 
 
 def convert_str_to_datetime(str_time: str) -> datetime.datetime:
