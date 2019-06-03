@@ -15,6 +15,7 @@ questionnaire = [
     [question_shedule_fri]
 ]
 
+
 def get_weekday(date_time: datetime.datetime):
     return date_time.isoweekday()
 
@@ -48,18 +49,20 @@ def get_username(data: dict) -> str:
 def welcome_reply(username: str) -> str:
     return 'Привет {}, просто выбери нужную опцию из списка 😀'.format(username)
 
+
 def text_reply_shedule(friday: bool) -> str:
     schedule = get_schedule()
     text = ['🌝 Утренняя развозка:']
     key = 'friday' if friday else 'mon_thu'
         
-    for time,description in schedule[key]['to'].items():
+    for time, description in schedule[key]['to'].items():
         text.append('{}  {}'.format(time, description))
     text.append('\n🌚 Вечерняя развозка:')
-    for time,description in schedule[key]['from'].items():
+    for time, description in schedule[key]['from'].items():
         text.append('{}  {}'.format(time, description))
 
     return "\n".join(text)
+
 
 def text_reply_next_bus(unix_time: int) -> str:
     shedule = get_schedule()
@@ -70,22 +73,22 @@ def text_reply_next_bus(unix_time: int) -> str:
 
     if weekday == 5:
         if timestamp < convert_str_to_datetime(list(shedule['friday']['to'].keys())[-1]):
-            for time,description in shedule['friday']['to'].items():
+            for time, description in shedule['friday']['to'].items():
                 if timestamp < convert_str_to_datetime(time):
                     return '{}{}  {}'.format(pre_text, time, description)
         elif timestamp < convert_str_to_datetime(list(shedule['friday']['from'].keys())[-1]):
-            for time,description in shedule['friday']['from'].items():
+            for time, description in shedule['friday']['from'].items():
                 if timestamp < convert_str_to_datetime(time):
                     return '{}{}  {}'.format(pre_text, time, description)
         else:
             return weekends_answer
     elif weekday <= 4:
         if timestamp < convert_str_to_datetime(list(shedule['mon_thu']['to'].keys())[-1]):
-            for time,description in shedule['mon_thu']['to'].items():
+            for time, description in shedule['mon_thu']['to'].items():
                 if timestamp < convert_str_to_datetime(time):
                     return '{}{}  {}'.format(pre_text, time, description)
         elif timestamp < convert_str_to_datetime(list(shedule['mon_thu']['from'].keys())[-1]):
-            for time,description in shedule['mon_thu']['from'].items():
+            for time, description in shedule['mon_thu']['from'].items():
                 if timestamp < convert_str_to_datetime(time):
                     return '{}{}  {}'.format(pre_text, time, description)
         else:
@@ -102,7 +105,7 @@ def get_send_message_url() -> str:
 
 
 def get_keyboard_markup(question_array: list) -> dict:
-    return  {
+    return {
         'keyboard': question_array,
         'resize_keyboard': True,
         'one_time_keyboard': True
