@@ -9,10 +9,12 @@ BOT_URL = 'https://api.telegram.org/bot{}/'.format(os.environ['BOT_TOKEN'])
 question_next_bus = '🏃🏻‍ Когда следующая развозка? 🏃🏼'
 question_shedule_mon_thu = '🚐 Расписание понедельник-четверг 🚌'
 question_shedule_fri = '🛸 Расписание пятница 🚀'
+question_lunch_bus = '🍝 Расписание ланч-автобусов 🌭'
 questionnaire = [
     [question_next_bus],
     [question_shedule_mon_thu],
-    [question_shedule_fri]
+    [question_shedule_fri],
+    [question_lunch_bus]
 ]
 
 
@@ -60,6 +62,16 @@ def text_reply_shedule(friday: bool) -> str:
     text.append('\n🌚 Вечерняя развозка:')
     for time, description in schedule[key]['from'].items():
         text.append('{}  {}'.format(time, description))
+
+    return "\n".join(text)
+
+
+def text_reply_lunch_bus() -> str:
+    schedule = get_schedule()
+    text = ['🍔 Ланч-автобусы:']
+
+    for description, time in schedule['lunch'].items():
+        text.append(f'{time}  {description}')
 
     return "\n".join(text)
 
@@ -128,11 +140,18 @@ def run(data: dict):
     
     if question_next_bus in message_text or '/1' in message_text:
         return send_message(text_reply_next_bus(message_date), chat_id)
+
     elif question_shedule_mon_thu in message_text or '/2' in message_text:
         return send_message(text_reply_shedule(friday=False), chat_id)
+
     elif question_shedule_fri in message_text or '/3' in message_text:
         return send_message(text_reply_shedule(friday=True), chat_id)
+
+    elif question_lunch_bus in message_text or '/4' in message_text:
+        return send_message(text_reply_lunch_bus(), chat_id)
+
     elif '/start' in message_text:
         return send_message(welcome_reply(get_username(data)), chat_id)
+
     else:
         return send_message("Я тебя не понял, повтори ещё раз 🙄", chat_id)
