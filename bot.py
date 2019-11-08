@@ -18,6 +18,7 @@ questionnaire = [
     [question_lunch_bus]
 ]
 
+
 def get_username(data: dict) -> str:
     if data['message']['from']['first_name']:
         return data['message']['from']['first_name']
