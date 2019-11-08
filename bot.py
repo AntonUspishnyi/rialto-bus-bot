@@ -1,8 +1,9 @@
 import os
 import json
-import datetime
+import pytz
+import schedule
+from datetime import datetime
 from botocore.vendored import requests
-
 
 BOT_URL = 'https://api.telegram.org/bot{}/'.format(os.environ['BOT_TOKEN'])
 
@@ -17,31 +18,6 @@ questionnaire = [
     [question_lunch_bus]
 ]
 
-
-def get_weekday(date_time: datetime.datetime):
-    return date_time.isoweekday()
-
-
-def convert_unixtime_to_datetime(unix_date: int) -> datetime.datetime:
-    """
-    Add (3600 * 2) for UTC+02:00 offset (Kyiv timezone)
-    OR
-    Add (3600 * 3) for UTC+03:00 offset (Kyiv timezone with summer-time)
-    TODO: automatic summer-time detection
-    """
-    return datetime.datetime.utcfromtimestamp(unix_date + 3600 * 2)
-
-
-def convert_str_to_datetime(str_time: str) -> datetime.datetime:
-    now = datetime.datetime.utcnow()
-
-    return datetime.datetime.strptime('{}:{}:{}:{}'.format(now.year, now.month, now.day, str_time), '%Y:%m:%d:%H:%M')
-
-
-def get_schedule() -> dict:
-    return json.loads(open('shedule.json').read())
-
-
 def get_username(data: dict) -> str:
     if data['message']['from']['first_name']:
         return data['message']['from']['first_name']
@@ -54,63 +30,48 @@ def welcome_reply(username: str) -> str:
 
 
 def text_reply_shedule(friday: bool) -> str:
-    schedule = get_schedule()
     text = ['🌝 Утренняя развозка:']
     key = 'friday' if friday else 'mon_thu'
         
-    for time, description in schedule[key]['to'].items():
+    for time, description in schedule.times[key].items():
         text.append('{}  {}'.format(time, description))
-    text.append('\n🌚 Вечерняя развозка:')
-    for time, description in schedule[key]['from'].items():
-        text.append('{}  {}'.format(time, description))
+        if time == '11:05':
+            text.append('\n🌚 Вечерняя развозка:')
 
     return "\n".join(text)
 
 
 def text_reply_lunch_bus() -> str:
-    schedule = get_schedule()
     text = ['🍔 Ланч-автобусы:']
-
-    for description, time in schedule['lunch'].items():
+    for description, time in schedule.lunch.items():
         text.append(f'{time}  {description}')
 
     return "\n".join(text)
 
 
 def text_reply_next_bus(unix_time: int) -> str:
-    shedule = get_schedule()
-    timestamp = convert_unixtime_to_datetime(unix_time)
-    weekday = get_weekday(timestamp)
     pre_text = '🚀 Следующая развозка:\n'
-    weekends_answer = 'В понедельник в {} утра 🤷‍'.format(list(shedule['mon_thu']['to'].keys())[0])
+    tz = pytz.timezone('Europe/Kiev')
+    dt = datetime.fromtimestamp(unix_time, tz)
 
-    if weekday == 5:
-        if timestamp < convert_str_to_datetime(list(shedule['friday']['to'].keys())[-1]):
-            for time, description in shedule['friday']['to'].items():
-                if timestamp < convert_str_to_datetime(time):
-                    return '{}{}  {}'.format(pre_text, time, description)
-        elif timestamp < convert_str_to_datetime(list(shedule['friday']['from'].keys())[-1]):
-            for time, description in shedule['friday']['from'].items():
-                if timestamp < convert_str_to_datetime(time):
-                    return '{}{}  {}'.format(pre_text, time, description)
-        else:
-            return weekends_answer
-    elif weekday <= 4:
-        if timestamp < convert_str_to_datetime(list(shedule['mon_thu']['to'].keys())[-1]):
-            for time, description in shedule['mon_thu']['to'].items():
-                if timestamp < convert_str_to_datetime(time):
-                    return '{}{}  {}'.format(pre_text, time, description)
-        elif timestamp < convert_str_to_datetime(list(shedule['mon_thu']['from'].keys())[-1]):
-            for time, description in shedule['mon_thu']['from'].items():
-                if timestamp < convert_str_to_datetime(time):
-                    return '{}{}  {}'.format(pre_text, time, description)
-        else:
-            if weekday == 4:
-                return 'Завтра в {} утра 🤷‍'.format(list(shedule['friday']['to'].keys())[0])
-            else:
-                return 'Завтра в {} утра 🤷‍'.format(list(shedule['mon_thu']['to'].keys())[0])
+    # weekday(): Monday is 0 and Sunday is 6
+    if dt.weekday() > 4:
+        return schedule.next_day_texts['friday']
+    elif dt.weekday() == 4:
+        key = 'friday'
     else:
-        return weekends_answer
+        key = 'mon_thu'
+
+    for n in list(schedule.times[key].keys()):
+        hrs, mnts = (int(x) for x in n.split(':'))
+        if dt.hour < hrs or (dt.hour == hrs and dt.minute < mnts):
+            return '{}{}  {}'.format(pre_text, n, schedule.times[key][n])
+
+    # To get next morning time for Monday, Tuesday, Wednesday
+    if dt.weekday() < 3:
+        key = 'friday'
+
+    return schedule.next_day_texts[key]
 
 
 def get_send_message_url() -> str:
