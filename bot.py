@@ -1,7 +1,7 @@
 import os
 import json
 import datetime
-from botocore.vendored import requests
+import requests
 
 
 BOT_URL = 'https://api.telegram.org/bot{}/'.format(os.environ['BOT_TOKEN'])
