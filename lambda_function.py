@@ -14,12 +14,9 @@ logging.getLogger().addHandler(GelfUdpHandler(
 
 def lambda_handler(event, context):
     try:
-        body = json.loads(event['body'])
-        logging.warning(f'Lambda incoming event:\n{event}')  # For DEBUG purposes
-
         return {
             'statusCode': 200,
-            'body': run(body)
+            'body': run(json.loads(event['body']))
         }
 
     except Exception as e:
