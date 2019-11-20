@@ -3,7 +3,6 @@ import json
 import datetime
 import requests
 
-
 BOT_URL = 'https://api.telegram.org/bot{}/'.format(os.environ['BOT_TOKEN'])
 
 question_next_bus = '🏃🏻‍ Когда следующая развозка? 🏃🏼'
