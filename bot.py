@@ -136,8 +136,15 @@ def send_message(text: str, chat_id: int):
 def run(data: dict):
     chat_id = data['message']['chat']['id']
     message_date = data['message']['date']
-    message_text = data['message']['text']
-    
+
+    ### tmp fix ###
+    if 'text' not in data['message'].keys():
+        message_text = '/start'
+
+    else:
+        message_text = data['message']['text']
+    ### tmp fix ###
+
     if question_next_bus in message_text or '/1' in message_text:
         return send_message(text_reply_next_bus(message_date), chat_id)
 
