@@ -6,7 +6,7 @@ from bot import run
 
 logging.getLogger().addHandler(GelfUdpHandler(
     host=os.environ['GRAYLOG_URL'],
-    port=os.environ['GRAYLOG_PORT'],
+    port=int(os.environ['GRAYLOG_PORT']),
     include_extra_fields=True,
     tag=os.environ['GRAYLOG_TAG']
 ))
