@@ -67,12 +67,13 @@ def text_reply_shedule(friday: bool) -> str:
 
 
 def text_reply_lunch_bus() -> str:
-    schedule = get_schedule()
-    text = ['🍔 Ланч-автобусы:']
+    schedule = get_schedule().get('lunch')
+    if not schedule:
+        return '🍔 Ланч-автобусы пока отсутствуют'
 
+    text = ['🍔 Ланч-автобусы:']
     for description, time in schedule['lunch'].items():
         text.append(f'{time}  {description}')
-
     return "\n".join(text)
 
 
