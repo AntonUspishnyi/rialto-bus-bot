@@ -2,18 +2,7 @@ import datetime
 import json
 import logging
 import os
-
 import requests
-from pygelf import GelfUdpHandler
-
-logging.getLogger().addHandler(
-    GelfUdpHandler(
-        host=os.environ["GRAYLOG_URL"],
-        port=int(os.environ["GRAYLOG_PORT"]),
-        include_extra_fields=True,
-        tag=os.environ["GRAYLOG_TAG"],
-    )
-)
 
 
 def handler(event, context):
