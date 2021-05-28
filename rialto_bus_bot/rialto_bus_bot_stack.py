@@ -10,10 +10,10 @@ class RialtoBusBotStack(cdk.Stack):
     def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-    lambda_function = _lambda.Function(
-        self,
-        "BotHandler",
-        runtime=_lambda.Runtime.PYTHON_3_8,
-        code=_lambda.Code.from_asset("lambda"),
-        handler="bot.handler"
-    )
+        lambda_function = _lambda.Function(
+            self,
+            "BotHandler",
+            runtime=_lambda.Runtime.PYTHON_3_8,
+            code=_lambda.Code.from_asset("lambda"),
+            handler="bot.handler"
+        )
