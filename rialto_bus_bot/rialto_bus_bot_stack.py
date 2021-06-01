@@ -1,4 +1,5 @@
 import os
+from typing import Optional, Mapping
 
 from aws_cdk import (
     core as cdk,
@@ -9,7 +10,7 @@ from aws_cdk import (
     aws_route53 as route53,
     aws_route53_targets as targets,
 )
-from aws_cdk.aws_lambda_python import PythonFunction, PythonLayerVersion
+from aws_cdk.aws_lambda_python import PythonLayerVersion
 
 
 class RialtoBusBotStack(cdk.Stack):
@@ -24,6 +25,7 @@ class RialtoBusBotStack(cdk.Stack):
             handler="bot.handler",
             runtime=_lambda.Runtime.PYTHON_3_8,
             layers=[self.create_common_layer("lambda", _lambda.Runtime.PYTHON_3_8)],
+            environment=self.get_lambda_env(["TG_BOT_TOKEN"]),
             log_retention=logs.RetentionDays.TWO_WEEKS,
             timeout=cdk.Duration.seconds(30),
         )
@@ -59,7 +61,7 @@ class RialtoBusBotStack(cdk.Stack):
             validation=acm.CertificateValidation.from_dns(hosted_zone),
         )
 
-        # Manually set tags (cfn could not set stack tags)
+        # Manually set tags (cfn could not set stack tags for certificate)
         self.set_certificate_tags(certificate, self.tags.render_tags())
 
         # Setup custom domain name to use instead of default https://***.execute-api.***.amazonaws.com
@@ -86,6 +88,12 @@ class RialtoBusBotStack(cdk.Stack):
             entry=entry,
             compatible_runtimes=[runtime],
         )
+
+    def get_lambda_env(self, env_keys: list) -> Optional[Mapping[str, str]]:
+        env = {}
+        for k in env_keys:
+            env[k] = os.environ[k]
+        return env or None
 
     def set_certificate_tags(self, cert: acm.Certificate, tags: list) -> None:
         for tag in tags:
