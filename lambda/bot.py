@@ -16,7 +16,7 @@ def handler(event, context):
         return {"statusCode": 500, "body": "Something went wrong"}
 
 
-BOT_URL = "https://api.telegram.org/bot{}/".format(os.environ["BOT_TOKEN"])
+BOT_URL = "https://api.telegram.org/bot{}/".format(os.environ["TG_BOT_TOKEN"])
 
 question_next_bus = "🏃🏻‍ Когда следующая развозка? 🏃🏼"
 question_shedule_mon_thu = "🚐 Расписание понедельник-четверг 🚌"
