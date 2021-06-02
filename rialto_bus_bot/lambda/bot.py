@@ -115,9 +115,9 @@ def format_schedule(weekday: str, schedule: dict) -> str:
     if not schedule:
         return f"Could not find schedule for {weekday} ☹️"
 
-    schedule_list = [f"<b>{weekday} schedule:</b>"]
+    schedule_list = []
     for description, time_list in schedule.items():
-        schedule_list.append(f"\n{description}")
+        schedule_list.append(f"\n{description}" if schedule_list else f"{description}")
         time_list.sort(key=lambda t: datetime.time.fromisoformat(t))
         schedule_list.append("\n".join(f"🔹<code>{t}</code>" for t in time_list))
     return "\n".join(schedule_list)
