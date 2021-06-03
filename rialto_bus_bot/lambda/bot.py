@@ -1,17 +1,18 @@
-import datetime
 import logging
 import os
+from datetime import datetime, time
 
 import pytz
 import telebot
 import yaml
 from telebot import types
 
+
 bot = telebot.TeleBot(os.environ["TG_BOT_TOKEN"], threaded=False)
 
 # Define the right timezone for bot calculations
 tz = pytz.timezone("Europe/Kiev")
-now = datetime.datetime.now(tz)
+now = datetime.now(tz)
 
 # Define buttons for main markup
 button_next_bus = "When's the next bus?"
@@ -32,7 +33,7 @@ def handler(event, context) -> dict:
         return {"statusCode": 500, "body": "Internal Server Error"}
 
 
-# Handle "/start" and "/help" commands
+# Handle "/start" command
 @bot.message_handler(commands=["start"])
 def send_welcome(message) -> None:
     bot.send_message(
@@ -45,10 +46,11 @@ def send_welcome(message) -> None:
 # Reply when's the next bus
 @bot.message_handler(func=lambda message: message.text == button_next_bus)
 def send_next_bus(message) -> None:
-    bot.reply_to(message, f"You hit the {button_next_bus} button", reply_markup=main_markup())
+    answer = get_next_bus_answer(now, load_schedule())
+    bot.send_message(message.chat.id, answer, parse_mode="HTML", reply_markup=main_markup())
 
 
-# Reply with schedule for today or specified day
+# Reply with schedule for today or any other specified day
 @bot.message_handler(func=lambda message: message.text == button_today_schedule)
 @bot.message_handler(func=lambda message: message.text in [day for day in load_schedule()])
 def send_day_schedule(message) -> None:
@@ -57,10 +59,10 @@ def send_day_schedule(message) -> None:
     bot.send_message(message.chat.id, schedule, parse_mode="HTML", reply_markup=main_markup())
 
 
-# Reply with markup with all days from schedule
+# Reply with markup with all days from schedule (to choose one day from all available)
 @bot.message_handler(func=lambda message: message.text == button_complete_schedule)
-def send_welcome(message) -> None:
-    bot.reply_to(message, f"Choose the day:", reply_markup=schedule_markup())
+def send_choose_day(message) -> None:
+    bot.send_message(message.chat.id, "Choose the day!", reply_markup=schedule_markup())
 
 
 # Handle all other messages
@@ -97,7 +99,7 @@ def load_schedule(path: str = "./schedule.yaml") -> dict:
         return yaml.safe_load(file)
 
 
-def get_weekday(dt: datetime.datetime) -> str:
+def get_weekday(dt: datetime) -> str:
     return dt.strftime("%A")
 
 
@@ -118,6 +120,47 @@ def format_schedule(weekday: str, schedule: dict) -> str:
     schedule_list = []
     for description, time_list in schedule.items():
         schedule_list.append(f"\n{description}" if schedule_list else f"{description}")
-        time_list.sort(key=lambda t: datetime.time.fromisoformat(t))
+        time_list.sort(key=lambda t: time.fromisoformat(t))
         schedule_list.append("\n".join(f"🔹<code>{t}</code>" for t in time_list))
     return "\n".join(schedule_list)
+
+
+def get_next_bus_answer(dt: datetime, schedule: dict) -> str:
+    today_schedule = schedule.get(get_weekday(dt))
+    if not today_schedule:
+        return "There are no buses today ☹️"
+
+    next_bus = calculate_delta(dt, today_schedule)
+    if not next_bus:
+        return "There are no more buses today ☹️"
+
+    return format_next_bus_answer(next_bus)
+
+
+def calculate_delta(dt: datetime, schedule: dict) -> dict:
+    # Make list of time:description items and sort them by datetime
+    sorted_schedule = sorted([i for i in schedule.items()], key=lambda x: time.fromisoformat(x[0]))
+
+    # Find the first timestamp from list bigger then now and return delta, str_time, description
+    for each in sorted_schedule:
+        schedule_time = convert_isotime_to_datetime(dt, each[0])
+        if dt < schedule_time:
+            return {"delta": schedule_time - dt, "str_time": each[0], "description": each[1]}
+    return {}
+
+
+def convert_isotime_to_datetime(dt: datetime, isotime: str) -> datetime:
+    return datetime.fromisoformat(f"{dt.date().isoformat()}T{isotime}").astimezone(tz)
+
+
+def format_next_bus_answer(data: dict) -> str:
+    delta = data["delta"].seconds
+    forecast = None
+    if delta < 60:
+        forecast = "less than a minute"
+    elif delta > 3600:
+        forecast = "more than an hour"
+    else:
+        forecast = f"{delta//60} minutes"
+
+    return f"It's <b>{forecast}</b> to the next bus:\n<code>{data['str_time']}</code> {data['description']}"
