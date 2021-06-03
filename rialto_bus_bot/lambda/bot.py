@@ -35,7 +35,7 @@ def handler(event, context) -> dict:
 def send_welcome(message) -> None:
     bot.send_message(
         message.chat.id,
-        f"Hi {get_username(message.from_user)}, here are the available commands👇",
+        f"Hi {get_username(message.from_user)}, here are all available commands👇",
         reply_markup=main_markup(),
     )
 
@@ -67,13 +67,13 @@ def send_choose_day(message) -> None:
 def send_re_ask(message) -> None:
     bot.reply_to(
         message,
-        f"Sorry, {get_username(message.from_user)}, I don't understand you 🤔\nCheck the available buttons.",
+        f"Sorry, {get_username(message.from_user)}, I don't understand you 🤔\nCheck available buttons.",
         reply_markup=main_markup(),
     )
 
 
 def build_markup(buttons: list) -> types.ReplyKeyboardMarkup:
-    markup = types.ReplyKeyboardMarkup(row_width=1)
+    markup = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)
     for button in buttons:
         markup.add(types.KeyboardButton(button))
     return markup
@@ -120,9 +120,9 @@ def format_schedule(weekday: str, schedule: dict) -> str:
 
     schedule_list = []
     for description, time_list in schedule.items():
-        schedule_list.append(f"\n{description}" if schedule_list else f"{description}")
+        schedule_list.append(f"\n{description}:" if schedule_list else f"{description}:")
         time_list.sort(key=lambda t: time.fromisoformat(t))
-        schedule_list.append("\n".join(f"🔹<code>{t}</code>" for t in time_list))
+        schedule_list.append("\n".join(f"<code>{t}</code>" for t in time_list))
     return "\n".join(schedule_list)
 
 
@@ -166,4 +166,4 @@ def format_next_bus_answer(data: dict) -> str:
     else:
         forecast = f"{delta//60} minutes"
 
-    return f"It's <b>{forecast}</b> to the next bus!\n(<code>{data['str_time']}</code> {data['description']})"
+    return f"It's <b>{forecast}</b> to the next bus:\n\n{data['description']} at <b>{data['str_time']}</b>"
