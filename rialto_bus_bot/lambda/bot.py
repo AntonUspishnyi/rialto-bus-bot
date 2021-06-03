@@ -2,17 +2,14 @@ import logging
 import os
 from datetime import datetime, time
 
-import pytz
 import telebot
 import yaml
+from dateutil import tz
 from telebot import types
 
 
-bot = telebot.TeleBot(os.environ["TG_BOT_TOKEN"], threaded=False)
-
-# Define the right timezone for bot calculations
-tz = pytz.timezone("Europe/Kiev")
-now = datetime.now(tz)
+bot = telebot.TeleBot(os.environ["BOT_TOKEN"], threaded=False)
+TZ = tz.gettz(os.environ["BOT_TIMEZONE"])
 
 # Define buttons for main markup
 button_next_bus = "When's the next bus?"
@@ -46,7 +43,7 @@ def send_welcome(message) -> None:
 # Reply when's the next bus
 @bot.message_handler(func=lambda message: message.text == button_next_bus)
 def send_next_bus(message) -> None:
-    answer = get_next_bus_answer(now, load_schedule())
+    answer = get_next_bus_answer(current_datetime(), load_schedule())
     bot.send_message(message.chat.id, answer, parse_mode="HTML", reply_markup=main_markup())
 
 
@@ -54,7 +51,7 @@ def send_next_bus(message) -> None:
 @bot.message_handler(func=lambda message: message.text == button_today_schedule)
 @bot.message_handler(func=lambda message: message.text in [day for day in load_schedule()])
 def send_day_schedule(message) -> None:
-    day = get_weekday(now) if message.text == button_today_schedule else message.text
+    day = get_weekday(current_datetime()) if message.text == button_today_schedule else message.text
     schedule = format_schedule(day, get_schedule_for(day))
     bot.send_message(message.chat.id, schedule, parse_mode="HTML", reply_markup=main_markup())
 
@@ -97,6 +94,10 @@ def get_username(from_user: types.User) -> str:
 def load_schedule(path: str = "./schedule.yaml") -> dict:
     with open(path) as file:
         return yaml.safe_load(file)
+
+
+def current_datetime() -> datetime:
+    return datetime.now(TZ)
 
 
 def get_weekday(dt: datetime) -> str:
@@ -150,7 +151,9 @@ def calculate_delta(dt: datetime, schedule: dict) -> dict:
 
 
 def convert_isotime_to_datetime(dt: datetime, isotime: str) -> datetime:
-    return datetime.fromisoformat(f"{dt.date().isoformat()}T{isotime}").astimezone(tz)
+    isotime = time.fromisoformat(isotime)
+    converted = dt.replace(hour=isotime.hour, minute=isotime.minute)
+    return converted
 
 
 def format_next_bus_answer(data: dict) -> str:
@@ -163,4 +166,4 @@ def format_next_bus_answer(data: dict) -> str:
     else:
         forecast = f"{delta//60} minutes"
 
-    return f"It's <b>{forecast}</b> to the next bus:\n<code>{data['str_time']}</code> {data['description']}"
+    return f"It's <b>{forecast}</b> to the next bus!\n(<code>{data['str_time']}</code> {data['description']})"

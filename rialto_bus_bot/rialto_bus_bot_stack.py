@@ -25,7 +25,7 @@ class RialtoBusBotStack(cdk.Stack):
             handler="bot.handler",
             runtime=_lambda.Runtime.PYTHON_3_8,
             layers=[self.create_common_layer("rialto_bus_bot/lambda", _lambda.Runtime.PYTHON_3_8)],
-            environment=self.get_lambda_env(["TG_BOT_TOKEN"]),
+            environment=self.get_lambda_env(["BOT_TIMEZONE", "BOT_TOKEN"]),
             log_retention=logs.RetentionDays.TWO_WEEKS,
             timeout=cdk.Duration.seconds(30),
         )
