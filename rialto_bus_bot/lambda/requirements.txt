@@ -1,3 +1,2 @@
 pyTelegramBotAPI==3.7.9
 PyYAML==5.4.1
-pytz==2021.1
