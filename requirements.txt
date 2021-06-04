@@ -1,0 +1,6 @@
+-e .
+aws-cdk.aws_lambda_python
+aws-cdk.aws_apigateway
+aws-cdk.aws_route53_targets
+python-dotenv
+-r rialto_bus_bot/lambda/requirements.txt
