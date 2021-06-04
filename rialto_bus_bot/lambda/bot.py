@@ -115,8 +115,8 @@ def get_schedule_for(weekday: str) -> dict:
 
     # Swap time and description for future formatting
     schedule_swapped = {}
-    for time, description in schedule.items():
-        schedule_swapped.setdefault(description, []).append(time)
+    for bus_time, description in schedule.items():
+        schedule_swapped.setdefault(description, []).append(bus_time)
     return schedule_swapped
 
 
@@ -154,13 +154,11 @@ def calculate_delta(dt: datetime, schedule: dict) -> dict:
 
 def convert_isotime_to_datetime(dt: datetime, isotime: str) -> datetime:
     isotime = time.fromisoformat(isotime)
-    converted = dt.replace(hour=isotime.hour, minute=isotime.minute)
-    return converted
+    return dt.replace(hour=isotime.hour, minute=isotime.minute)
 
 
 def format_next_bus_answer(data: dict) -> str:
     delta = data["delta"].seconds
-    forecast = None
     if delta < 60:
         forecast = "less than a minute"
     elif delta > 3600:
