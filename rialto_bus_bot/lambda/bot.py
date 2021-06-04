@@ -92,8 +92,13 @@ def get_username(from_user: types.User) -> str:
 
 
 def load_schedule(path: str = "./schedule.yaml") -> dict:
+    schedule = None
     with open(path) as file:
-        return yaml.safe_load(file)
+        schedule = yaml.safe_load(file)
+    return {
+        k: dict(sorted(v.items(), key=lambda x: time.fromisoformat(x[0])))
+        for k, v in schedule.items()
+    }
 
 
 def current_datetime() -> datetime:
@@ -121,7 +126,6 @@ def format_schedule(weekday: str, schedule: dict) -> str:
     schedule_list = []
     for description, time_list in schedule.items():
         schedule_list.append(f"\n{description}:" if schedule_list else f"{description}:")
-        time_list.sort(key=lambda t: time.fromisoformat(t))
         schedule_list.append("\n".join(f"<code>{t}</code>" for t in time_list))
     return "\n".join(schedule_list)
 
@@ -139,11 +143,8 @@ def get_next_bus_answer(dt: datetime, schedule: dict) -> str:
 
 
 def calculate_delta(dt: datetime, schedule: dict) -> dict:
-    # Make list of time:description items and sort them by datetime
-    sorted_schedule = sorted([i for i in schedule.items()], key=lambda x: time.fromisoformat(x[0]))
-
     # Find the first timestamp from list bigger then now and return delta, str_time, description
-    for each in sorted_schedule:
+    for each in list(schedule.items()):
         schedule_time = convert_isotime_to_datetime(dt, each[0])
         if dt < schedule_time:
             return {"delta": schedule_time - dt, "str_time": each[0], "description": each[1]}
