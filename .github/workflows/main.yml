@@ -12,6 +12,7 @@ jobs:
       - name: black
         uses: jpetrucciani/black-check@6ccaad6b470e4f5999d70021474781a53769ed71
   diff:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,6 +31,7 @@ jobs:
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           HOSTED_ZONE_NAME: ${{ secrets.HOSTED_ZONE_NAME }}
   deploy:
+    needs: diff
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
