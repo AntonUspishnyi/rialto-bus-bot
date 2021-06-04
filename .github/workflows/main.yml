@@ -20,7 +20,7 @@ jobs:
         uses: youyo/aws-cdk-github-actions@992898857d285b336717de99e63cf059210cbb10
         with:
           cdk_subcommand: 'diff'
-          actions_comment: true
+          actions_comment: false
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
