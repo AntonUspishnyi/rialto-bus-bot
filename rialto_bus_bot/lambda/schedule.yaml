@@ -26,7 +26,7 @@ Wednesday:
 Thursday:
   <<: *monday
 Friday:
-  '08:05': &to_office
+  '08:05': *to_office
   '08:20': *to_office
   '08:40': *to_office
   '08:50': *to_office
@@ -37,7 +37,7 @@ Friday:
   '10:35': *to_office
   '10:50': *to_office
   '11:05': *to_office
-  '16:40': &from_office
+  '16:40': *from_office
   '16:55': *from_office
   '17:05': *from_office
   '17:20': *from_office
