@@ -49,7 +49,7 @@ def send_next_bus(message) -> None:
 
 # Reply with schedule for today or any other specified day
 @bot.message_handler(func=lambda message: message.text == button_today_schedule)
-@bot.message_handler(func=lambda message: message.text in [day for day in load_schedule()])
+@bot.message_handler(func=lambda message: message.text in load_schedule())
 def send_day_schedule(message) -> None:
     day = get_weekday(current_datetime()) if message.text == button_today_schedule else message.text
     schedule = format_schedule(day, get_schedule_for(day))
