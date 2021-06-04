@@ -1,3 +1,4 @@
+import functools
 import logging
 import os
 from datetime import datetime, time
@@ -91,8 +92,8 @@ def get_username(from_user: types.User) -> str:
     return from_user.first_name or from_user.username
 
 
+@functools.lru_cache()
 def load_schedule(path: str = "./schedule.yaml") -> dict:
-    schedule = None
     with open(path) as file:
         schedule = yaml.safe_load(file)
     return {
