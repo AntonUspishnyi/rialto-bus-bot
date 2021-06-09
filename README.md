@@ -1,10 +1,12 @@
 
 # Welcome to RialtoBusBot project!
 
-This is a project for Python development with CDK.
+This is a project for Python development with AWS CDK.
+
+You can try it in Telegram - [@RialtoBusBot](https://t.me/RialtoBusBot).
 
 ---
-## Useful commands
+## Useful cdk commands
 
  * `cdk ls`          list all stacks in the app
  * `cdk synth`       emits the synthesized CloudFormation template
