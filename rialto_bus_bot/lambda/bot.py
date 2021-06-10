@@ -1,7 +1,7 @@
 import functools
 import logging
 import os
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 import telebot
 import yaml
@@ -44,7 +44,7 @@ def send_welcome(message) -> None:
 # Reply when's the next bus
 @bot.message_handler(func=lambda message: message.text == button_next_bus)
 def send_next_bus(message) -> None:
-    answer = get_next_bus_answer(current_datetime(), load_schedule())
+    answer = get_next_bus_answer(schedule=load_schedule())
     bot.send_message(message.chat.id, answer, parse_mode="HTML", reply_markup=main_markup())
 
 
@@ -52,9 +52,9 @@ def send_next_bus(message) -> None:
 @bot.message_handler(func=lambda message: message.text == button_today_schedule)
 @bot.message_handler(func=lambda message: message.text in load_schedule())
 def send_day_schedule(message) -> None:
-    day = get_weekday(current_datetime()) if message.text == button_today_schedule else message.text
-    schedule = format_schedule(day, get_schedule_for(day))
-    bot.send_message(message.chat.id, schedule, parse_mode="HTML", reply_markup=main_markup())
+    day = get_weekday() if message.text == button_today_schedule else message.text
+    answer = format_schedule(schedule=get_schedule_for(day))
+    bot.send_message(message.chat.id, answer, parse_mode="HTML", reply_markup=main_markup())
 
 
 # Reply with markup with all days from schedule (to choose one day from all available)
@@ -106,7 +106,7 @@ def current_datetime() -> datetime:
     return datetime.now(TZ)
 
 
-def get_weekday(dt: datetime) -> str:
+def get_weekday(dt: datetime = current_datetime()) -> str:
     return dt.strftime("%A")
 
 
@@ -120,10 +120,7 @@ def get_schedule_for(weekday: str) -> dict:
     return schedule_swapped
 
 
-def format_schedule(weekday: str, schedule: dict) -> str:
-    if not schedule:
-        return f"Could not find schedule for {weekday} ☹️"
-
+def format_schedule(schedule: dict) -> str:
     schedule_list = []
     for description, time_list in schedule.items():
         schedule_list.append(f"\n{description}:" if schedule_list else f"{description}:")
@@ -131,24 +128,25 @@ def format_schedule(weekday: str, schedule: dict) -> str:
     return "\n".join(schedule_list)
 
 
-def get_next_bus_answer(dt: datetime, schedule: dict) -> str:
+def get_next_bus_answer(schedule: dict, dt: datetime = current_datetime()) -> str:
     today_schedule = schedule.get(get_weekday(dt))
     if not today_schedule:
         return "There are no buses today ☹️"
 
-    next_bus = calculate_delta(dt, today_schedule)
+    next_bus = find_next_bus(dt, today_schedule)
     if not next_bus:
         return "There are no more buses today ☹️"
 
-    return format_next_bus_answer(next_bus)
+    forecast = get_next_bus_forecast(next_bus["delta"])
+    return f"It's <b>{forecast}</b> to the next bus:\n\n{next_bus['description']} at <b>{next_bus['str_time']}</b>"
 
 
-def calculate_delta(dt: datetime, schedule: dict) -> dict:
+def find_next_bus(dt: datetime, schedule: dict) -> dict:
     # Find the first timestamp from list bigger then now and return delta, str_time, description
-    for each in list(schedule.items()):
-        schedule_time = convert_isotime_to_datetime(dt, each[0])
+    for str_time, description in schedule.items():
+        schedule_time = convert_isotime_to_datetime(dt, str_time)
         if dt < schedule_time:
-            return {"delta": schedule_time - dt, "str_time": each[0], "description": each[1]}
+            return {"delta": schedule_time - dt, "str_time": str_time, "description": description}
     return {}
 
 
@@ -157,13 +155,10 @@ def convert_isotime_to_datetime(dt: datetime, isotime: str) -> datetime:
     return dt.replace(hour=isotime.hour, minute=isotime.minute)
 
 
-def format_next_bus_answer(data: dict) -> str:
-    delta = data["delta"].seconds
-    if delta < 60:
-        forecast = "less than a minute"
-    elif delta > 3600:
-        forecast = "more than an hour"
+def get_next_bus_forecast(delta: timedelta) -> str:
+    if delta.seconds < 60:
+        return "less than a minute"
+    elif delta.seconds > 3600:
+        return "more than an hour"
     else:
-        forecast = f"{delta//60} minutes"
-
-    return f"It's <b>{forecast}</b> to the next bus:\n\n{data['description']} at <b>{data['str_time']}</b>"
+        return f"{delta.seconds//60} minutes"
