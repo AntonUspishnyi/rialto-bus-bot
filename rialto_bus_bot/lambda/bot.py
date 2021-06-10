@@ -44,7 +44,7 @@ def send_welcome(message) -> None:
 # Reply when's the next bus
 @bot.message_handler(func=lambda message: message.text == button_next_bus)
 def send_next_bus(message) -> None:
-    answer = get_next_bus_answer(schedule=load_schedule())
+    answer = get_next_bus_answer(schedule=load_schedule(), dt=current_datetime())
     bot.send_message(message.chat.id, answer, parse_mode="HTML", reply_markup=main_markup())
 
 
@@ -52,7 +52,7 @@ def send_next_bus(message) -> None:
 @bot.message_handler(func=lambda message: message.text == button_today_schedule)
 @bot.message_handler(func=lambda message: message.text in load_schedule())
 def send_day_schedule(message) -> None:
-    day = get_weekday() if message.text == button_today_schedule else message.text
+    day = get_weekday(current_datetime()) if message.text == button_today_schedule else message.text
     answer = format_schedule(schedule=get_schedule_for(day))
     bot.send_message(message.chat.id, answer, parse_mode="HTML", reply_markup=main_markup())
 
@@ -106,7 +106,7 @@ def current_datetime() -> datetime:
     return datetime.now(TZ)
 
 
-def get_weekday(dt: datetime = current_datetime()) -> str:
+def get_weekday(dt: datetime) -> str:
     return dt.strftime("%A")
 
 
@@ -128,7 +128,7 @@ def format_schedule(schedule: dict) -> str:
     return "\n".join(schedule_list)
 
 
-def get_next_bus_answer(schedule: dict, dt: datetime = current_datetime()) -> str:
+def get_next_bus_answer(schedule: dict, dt: datetime) -> str:
     today_schedule = schedule.get(get_weekday(dt))
     if not today_schedule:
         return "There are no buses today ☹️"
