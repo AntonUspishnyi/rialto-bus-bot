@@ -13,11 +13,7 @@ jobs:
 #        uses: jpetrucciani/black-check@6ccaad6b470e4f5999d70021474781a53769ed71
 
   diff:
-    container:
-      image: alpine:3
-      volumes:
-        - /tmp/rialto-bus-bot/cdk.out:/tmp/rialto-bus-bot/cdk.out
-    needs: lint
+#    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: checkout
