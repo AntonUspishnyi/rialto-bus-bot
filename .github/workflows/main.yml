@@ -20,7 +20,7 @@ jobs:
         uses: youyo/aws-cdk-github-actions@992898857d285b336717de99e63cf059210cbb10
         with:
           cdk_subcommand: 'diff'
-          cdk_args: '--ci true'
+          cdk_args: '--output "/home/runner/work/rialto-bus-bot/rialto-bus-bot/cdk.out"'
           actions_comment: false
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
