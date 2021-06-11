@@ -90,10 +90,7 @@ class RialtoBusBotStack(cdk.Stack):
         )
 
     def get_lambda_env(self, env_keys: list) -> Optional[Mapping[str, str]]:
-        env = {}
-        for k in env_keys:
-            env[k] = os.environ[k]
-        return env or None
+        return {k: os.environ[k] for k in env_keys} or None
 
     def set_certificate_tags(self, cert: acm.Certificate, tags: list) -> None:
         for tag in tags:
