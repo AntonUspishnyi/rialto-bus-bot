@@ -21,6 +21,8 @@ jobs:
   diff:
     needs: lint
     runs-on: ubuntu-latest
+    env:
+      WORKFLOW_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
     steps:
 
       - name: Checkout
@@ -56,12 +58,13 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           HOSTED_ZONE_NAME: ${{ secrets.HOSTED_ZONE_NAME }}
-          WORKFLOW_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
 
   deploy:
     needs: diff
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    env:
+      WORKFLOW_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
     steps:
 
       - name: Checkout
@@ -97,4 +100,3 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           HOSTED_ZONE_NAME: ${{ secrets.HOSTED_ZONE_NAME }}
-          WORKFLOW_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
