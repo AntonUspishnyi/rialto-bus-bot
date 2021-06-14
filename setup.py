@@ -6,8 +6,8 @@ with open("README.md") as fp:
 
 setuptools.setup(
     name="rialto_bus_bot",
-    version="0.0.1",
-    description="CDK Python app",
+    version="1.0.0",
+    description="RialtoBusBot CDK Python app",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="author",
