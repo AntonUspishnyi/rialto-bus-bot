@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  WORKFLOW_URL: '${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}'
+
 jobs:
 
   lint:
@@ -21,8 +24,6 @@ jobs:
   diff:
     needs: lint
     runs-on: ubuntu-latest
-    env:
-      WORKFLOW_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
     steps:
 
       - name: Checkout
@@ -63,8 +64,6 @@ jobs:
     needs: diff
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    env:
-      WORKFLOW_URL: ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/actions/runs/${{ env.GITHUB_RUN_ID }}
     steps:
 
       - name: Checkout
