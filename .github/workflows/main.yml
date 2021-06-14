@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Black
-        uses: jpetrucciani/black-check@6ccaad6b470e4f5999d70021474781a53769ed71
+        uses: psf/black@stable
 
   diff:
     needs: lint
