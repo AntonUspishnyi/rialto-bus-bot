@@ -13,7 +13,7 @@ jobs:
     steps:
 
       - name: Checkout
-        uses: actions/checkout@v
+        uses: actions/checkout@v2
 
       - name: Black
         uses: jpetrucciani/black-check@6ccaad6b470e4f5999d70021474781a53769ed71
