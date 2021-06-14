@@ -87,7 +87,7 @@ jobs:
 
       - name: cdk deploy
         run: |
-          cdk deploy --require-approval never
+          cdk deploy --require-approval never --force true --progress events
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
