@@ -161,4 +161,5 @@ def get_next_bus_forecast(delta: timedelta) -> str:
     elif delta.seconds > 3600:
         return "more than an hour"
     else:
-        return f"{delta.seconds//60} minutes"
+        t = delta.seconds // 60
+        return f"{t} minute{'s' if t != 1 else ''}"
