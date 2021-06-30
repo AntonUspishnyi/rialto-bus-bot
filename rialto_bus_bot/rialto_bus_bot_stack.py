@@ -59,9 +59,7 @@ class RialtoBusBotStack(cdk.Stack):
 
         # Add resource for bot ownership validation
         validation_endpoint = api.root.add_resource("amazonregistry-validation")
-        validation_endpoint.add_method(
-            "GET", apigw.LambdaIntegration(validation_handler, proxy=False)
-        )
+        validation_endpoint.add_method("GET", apigw.LambdaIntegration(validation_handler))
 
         # Import existing DNS hosted zone for certificate validation
         dns_zone = os.environ["HOSTED_ZONE_NAME"]

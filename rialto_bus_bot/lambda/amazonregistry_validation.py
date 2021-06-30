@@ -6,5 +6,5 @@ https://www.amazonregistry.com
 
 
 def handler(event, context) -> dict:
-    print(event)
+    print(event, context)
     return {"statusCode": 200, "body": "OK"}
