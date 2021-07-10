@@ -7,18 +7,15 @@ Monday: &monday
   '09:35': *to_office
   '09:50': *to_office
   '10:15': *to_office
-  '10:35': *to_office
   '10:50': *to_office
-  '11:05': *to_office
   '17:40': &from_office "Rialto ➟ T.Shevchenko"
   '18:05': *from_office
   '18:10': *from_office
   '18:35': *from_office
   '18:45': *from_office
-  '19:05': *from_office
+  '19:10': *from_office
   '19:30': *from_office
-  '20:10': *from_office
-  '20:30': *from_office
+  '19:50': *from_office
 Tuesday:
   <<: *monday
 Wednesday:
@@ -34,9 +31,7 @@ Friday:
   '09:35': *to_office
   '09:50': *to_office
   '10:15': *to_office
-  '10:35': *to_office
   '10:50': *to_office
-  '11:05': *to_office
   '16:40': *from_office
   '16:55': *from_office
   '17:05': *from_office
@@ -45,5 +40,4 @@ Friday:
   '18:10': *from_office
   '18:40': *from_office
   '19:10': *from_office
-  '19:40': *from_office
-  '20:10': *from_office
+  '19:50': *from_office
