@@ -53,7 +53,7 @@ def send_next_bus(message) -> None:
 @bot.message_handler(func=lambda message: message.text in load_schedule())
 def send_day_schedule(message) -> None:
     day = get_weekday(current_datetime()) if message.text == button_today_schedule else message.text
-    answer = format_schedule(schedule=get_schedule_for(day))
+    answer = get_schedule_answer(day)
     bot.send_message(message.chat.id, answer, parse_mode="HTML", reply_markup=main_markup())
 
 
@@ -110,6 +110,18 @@ def get_weekday(dt: datetime) -> str:
     return dt.strftime("%A")
 
 
+def get_schedule_answer(day: str) -> str:
+    schedule = get_schedule_for(day)
+    if not schedule:
+        return f"Could not find schedule for {day} ☹️"
+
+    schedule_list = []
+    for description, time_list in schedule.items():
+        schedule_list.append(f"\n{description}:" if schedule_list else f"{description}:")
+        schedule_list.append("\n".join(f"<code>{t}</code>" for t in time_list))
+    return "\n".join(schedule_list)
+
+
 def get_schedule_for(weekday: str) -> dict:
     schedule = load_schedule().get(weekday, {})
 
@@ -118,14 +130,6 @@ def get_schedule_for(weekday: str) -> dict:
     for bus_time, description in schedule.items():
         schedule_swapped.setdefault(description, []).append(bus_time)
     return schedule_swapped
-
-
-def format_schedule(schedule: dict) -> str:
-    schedule_list = []
-    for description, time_list in schedule.items():
-        schedule_list.append(f"\n{description}:" if schedule_list else f"{description}:")
-        schedule_list.append("\n".join(f"<code>{t}</code>" for t in time_list))
-    return "\n".join(schedule_list)
 
 
 def get_next_bus_answer(schedule: dict, dt: datetime) -> str:
