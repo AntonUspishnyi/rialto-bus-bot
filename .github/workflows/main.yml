@@ -49,7 +49,7 @@ jobs:
 
       - name: cdk diff
         run: |
-          cdk diff
+          cdk diff --no-color 2>&1 | tee cdk.log
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
@@ -59,6 +59,21 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           HOSTED_ZONE_NAME: ${{ secrets.HOSTED_ZONE_NAME }}
+
+      - name: Add comment to PR
+        if: github.event_name == 'pull_request'
+        run: |
+          echo $(echo -n '```'; cat cdk.log; echo -n '```') > cdk.log
+          jq --raw-input --slurp '{body: .}' cdk.log > cdk.json
+          curl \
+            -H "Content-Type: application/json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -d @cdk.json \
+            -X POST \
+            $URL
+        env:
+          URL: ${{ github.event.pull_request.comments_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: diff
