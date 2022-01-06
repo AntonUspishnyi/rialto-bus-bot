@@ -63,7 +63,7 @@ jobs:
       - name: Add comment to PR
         if: github.event_name == 'pull_request'
         run: |
-          sed -i '1i\`\`\`' cdk.log && echo \`\`\` >> cdk.log
+          sed 's/^.*Bundling asset/Bundling asset/' cdk.log && sed -i '1i\`\`\`' cdk.log && echo \`\`\` >> cdk.log
           jq --raw-input --slurp '{body: .}' cdk.log > cdk.log.json
           curl \
             -H "Content-Type: application/json" \
