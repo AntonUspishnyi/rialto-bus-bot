@@ -63,12 +63,12 @@ jobs:
       - name: Add comment to PR
         if: github.event_name == 'pull_request'
         run: |
-          echo $(echo -n '```'; cat cdk.log; echo -n '```') > cdk.log
-          jq --raw-input --slurp '{body: .}' cdk.log > cdk.json
+          sed -i '1i\`\`\`' cdk.log && echo \`\`\` >> cdk.log
+          jq --raw-input --slurp '{body: .}' cdk.log > cdk.log.json
           curl \
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
-            -d @cdk.json \
+            -d @cdk.log.json \
             -X POST \
             $URL
         env:
