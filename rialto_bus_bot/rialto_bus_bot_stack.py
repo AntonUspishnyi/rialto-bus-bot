@@ -35,17 +35,6 @@ class RialtoBusBotStack(Stack):
             timeout=Duration.seconds(30),
         )
 
-        # Handler to validate bot ownership
-        validation_handler = _lambda.Function(
-            self,
-            "AmazonRegistryValidationHandler",
-            code=_lambda.Code.from_asset(LAMBDA_ASSET_PATH),
-            handler="amazonregistry_validation.handler",
-            runtime=LAMBDA_RUNTIME,
-            log_retention=logs.RetentionDays.TWO_WEEKS,
-            timeout=Duration.seconds(5),
-        )
-
         # Define API Gateway distribution
         api = apigw.LambdaRestApi(
             self,
@@ -58,10 +47,6 @@ class RialtoBusBotStack(Stack):
         # Add resource to receive webhooks by POST method
         tg_webhook_receive = api.root.add_resource("tg-webhook-receive")
         tg_webhook_receive.add_method("POST")
-
-        # Add resource for bot ownership validation
-        validation_endpoint = api.root.add_resource("amazonregistry-validation")
-        validation_endpoint.add_method("GET", apigw.LambdaIntegration(validation_handler))
 
         # Import existing DNS hosted zone for certificate validation
         dns_zone = os.environ["HOSTED_ZONE_NAME"]
