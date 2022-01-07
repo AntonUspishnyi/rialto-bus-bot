@@ -24,6 +24,7 @@ jobs:
   diff:
     needs: lint
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
 
       - name: Checkout
@@ -61,7 +62,6 @@ jobs:
           HOSTED_ZONE_NAME: ${{ secrets.HOSTED_ZONE_NAME }}
 
       - name: Add comment to PR
-        if: github.event_name == 'pull_request'
         run: |
           sed -in '1,/^Stack rialto-bus-bot.*/d' cdk.log
           jq --raw-input --slurp '{body: ("```" + . + "```")}' cdk.log > cdk.log.json
@@ -76,7 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    needs: diff
+    needs: lint
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
