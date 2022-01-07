@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 
-from aws_cdk import core as cdk
+from aws_cdk import App
 from dotenv import load_dotenv
 from rialto_bus_bot.rialto_bus_bot_stack import RialtoBusBotStack
 
@@ -13,7 +13,7 @@ stack_name = "rialto-bus-bot"
 description = os.getenv("WORKFLOW_URL") or "No url specified"
 stack_tags = {"project": stack_name, "cdk": "true", "CI": os.getenv("CI", "false")}
 
-app = cdk.App()
+app = App()
 RialtoBusBotStack(app, stack_name, description=description, tags=stack_tags)
 
 app.synth()
