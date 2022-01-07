@@ -14,7 +14,9 @@ setuptools.setup(
     package_dir={"": "rialto_bus_bot"},
     packages=setuptools.find_packages(where="rialto_bus_bot"),
     install_requires=[
-        "aws-cdk.core==1.131.0",
+        "aws-cdk-lib>=2.4.0",
+        "constructs>=10.0.0",
+        "aws-cdk.aws-lambda-python-alpha",
     ],
     python_requires=">=3.6",
     classifiers=[

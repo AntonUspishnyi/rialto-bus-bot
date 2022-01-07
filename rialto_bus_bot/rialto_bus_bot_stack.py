@@ -1,23 +1,25 @@
 import os
-from typing import Optional, Mapping
+from typing import Mapping, Optional
 
 from aws_cdk import (
-    core as cdk,
-    aws_lambda as _lambda,
+    Duration,
+    Stack,
     aws_apigateway as apigw,
-    aws_logs as logs,
     aws_certificatemanager as acm,
+    aws_lambda as _lambda,
+    aws_logs as logs,
     aws_route53 as route53,
     aws_route53_targets as targets,
 )
-from aws_cdk.aws_lambda_python import PythonLayerVersion
+from aws_cdk.aws_lambda_python_alpha import PythonLayerVersion
+from constructs import Construct
 
 LAMBDA_ASSET_PATH = "rialto_bus_bot/lambda"
-LAMBDA_RUNTIME = _lambda.Runtime.PYTHON_3_8
+LAMBDA_RUNTIME = _lambda.Runtime.PYTHON_3_9
 
 
-class RialtoBusBotStack(cdk.Stack):
-    def __init__(self, scope: cdk.Construct, construct_id: str, **kwargs) -> None:
+class RialtoBusBotStack(Stack):
+    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Define lambda and lambda layer
@@ -30,18 +32,7 @@ class RialtoBusBotStack(cdk.Stack):
             layers=[self.create_common_layer(LAMBDA_ASSET_PATH, LAMBDA_RUNTIME)],
             environment=self.get_lambda_env(["BOT_TIMEZONE", "BOT_TOKEN"]),
             log_retention=logs.RetentionDays.TWO_WEEKS,
-            timeout=cdk.Duration.seconds(30),
-        )
-
-        # Handler to validate bot ownership
-        validation_handler = _lambda.Function(
-            self,
-            "AmazonRegistryValidationHandler",
-            code=_lambda.Code.from_asset(LAMBDA_ASSET_PATH),
-            handler="amazonregistry_validation.handler",
-            runtime=LAMBDA_RUNTIME,
-            log_retention=logs.RetentionDays.TWO_WEEKS,
-            timeout=cdk.Duration.seconds(5),
+            timeout=Duration.seconds(30),
         )
 
         # Define API Gateway distribution
@@ -56,10 +47,6 @@ class RialtoBusBotStack(cdk.Stack):
         # Add resource to receive webhooks by POST method
         tg_webhook_receive = api.root.add_resource("tg-webhook-receive")
         tg_webhook_receive.add_method("POST")
-
-        # Add resource for bot ownership validation
-        validation_endpoint = api.root.add_resource("amazonregistry-validation")
-        validation_endpoint.add_method("GET", apigw.LambdaIntegration(validation_handler))
 
         # Import existing DNS hosted zone for certificate validation
         dns_zone = os.environ["HOSTED_ZONE_NAME"]
